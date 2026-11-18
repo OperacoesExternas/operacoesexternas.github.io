@@ -84,7 +84,7 @@ h2{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 .semcid{font-size:10px;color:var(--ink-2);margin-left:auto}
 .rodape{font-size:10px;color:var(--ink-2);margin-top:4px}
 @media (orientation:portrait),(max-width:760px){
-  .grid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.05fr) minmax(0,1.2fr) minmax(0,.75fr);
+  .grid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.45fr) minmax(0,1fr) minmax(0,.72fr);
     grid-template-areas:"kpis" "mapa" "status" "evol"}
   .mapa .legenda{display:none}
   .kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
@@ -97,6 +97,11 @@ h2{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   .grupo li{padding:.12em .45em;margin-bottom:.16em}
   .grupo{padding:6px 8px}
   .grupo .hd{margin-bottom:4px}
+  .status.sem-desl{flex-direction:column;gap:6px}
+  .status.sem-desl .grupo.vz{flex:none;max-width:none;flex-direction:row;align-items:center;gap:8px;padding:6px 10px}
+  .status.sem-desl .grupo.vz .hd{margin:0;flex-wrap:nowrap}
+  .status.sem-desl .grupo.vz h3{white-space:nowrap}
+  .status.sem-desl .grupo.vz .vazio{margin:0;font-size:11px}
 }
 @media (max-height:480px) and (orientation:landscape){.kpi .sub{display:none}}
 </style>
@@ -153,7 +158,7 @@ $('k3s').textContent=D.k.sucesso_ant==null?'':D.k.mes_ant_nome+': '+D.k.sucesso_
 $('k4l').textContent='Visitas em '+D.ano;
 $('k4').textContent=D.k.visitas_ano;
 $('k4s').textContent='jan até hoje';
-$('h-sem').textContent='Sucesso por semana · '+D.mes_curto;
+$('h-sem').textContent=innerWidth<600?'Sucesso semanal':'Sucesso por semana · '+D.mes_curto;
 $('h-ano').textContent='Evolução em '+D.ano;
 if(D.sem_cidade>0)$('semcid').textContent=D.sem_cidade+(D.sem_cidade>1?' rotas sem cidade no cadastro':' rota sem cidade no cadastro');
 const g=$('rotas');const saidas={},dests={};
@@ -182,7 +187,7 @@ function ajustaLista(){['l-desl','l-atend'].forEach(id=>{const ul=$(id);if(!ul.c
 })}
 $('n-desl').textContent=nd;$('n-atend').textContent=na;
 const vz=D.fim_de_semana?'Fim de semana, sem visitas em andamento':'Nenhuma visita nesta etapa hoje';
-if(!nd){$('v-desl').hidden=false;$('v-desl').textContent=vz;$('l-desl').closest('.grupo').classList.add('vz')}
+if(!nd){$('v-desl').hidden=false;$('v-desl').textContent=vz;$('l-desl').closest('.grupo').classList.add('vz');$('l-desl').closest('.status').classList.add('sem-desl')}
 if(!na&&!nf){$('v-atend').hidden=false;$('v-atend').textContent=vz;$('l-atend').closest('.grupo').classList.add('vz')}
 Object.entries(dests).forEach(([c,p])=>{const k=el('circle',{cx:p[0],cy:p[1],r:5,class:'pt-dest'});k.appendChild(el('title',{},c));g.appendChild(k)});
 Object.entries(saidas).forEach(([c,p])=>{const k=el('circle',{cx:p[0],cy:p[1],r:6,class:'pt-saida'});k.appendChild(el('title',{},'Saída: '+c));g.appendChild(k)});
@@ -191,7 +196,7 @@ LB.forEach(l=>{l.t=el('text',{class:'lbl-c'+(l.s?' lbl-s':'')},l.c);g.appendChil
 let VB=null;
 (function zoom(){const pts=[...Object.values(saidas),...Object.values(dests)];if(!pts.length)return;
  let x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));
- const px=75,py=35;x0-=px;y0-=py;x1+=px;y1+=py;let w=x1-x0,h=y1-y0;const mw=260;
+ const px=75,py=matchMedia('(orientation:portrait),(max-width:760px)').matches?70:35;x0-=px;y0-=py;x1+=px;y1+=py;let w=x1-x0,h=y1-y0;const mw=260;
  if(w<mw){x0-=(mw-w)/2;w=mw} if(h<mw*.9){y0-=(mw*.9-h)/2;h=mw*.9}
  VB=[x0,y0,w,h];$('mapa').setAttribute('viewBox',`${x0} ${y0} ${w} ${h}`);})();
 function escala(){const sv=$('mapa');const r=sv.getBoundingClientRect();if(!r.width)return;
@@ -202,11 +207,11 @@ function rotulos(u){
  const hit=(a,b)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
  const pbox=pts.map(p=>({x:p[0]-R,y:p[1]-R,w:2*R,h:2*R}));
  const placed=[];
- const ord=[...LB].sort((a,b)=>a.p[1]-b.p[1]||a.p[0]-b.p[0]);
+ const ord=[...LB].sort((a,b)=>b.s-a.s||a.p[1]-b.p[1]||a.p[0]-b.p[0]);
  const cr0=$('mapa').getBoundingClientRect();
  ord.forEach(l=>{l.t.style.display='';const [x,y]=l.p,o=9*u,h=12*u;
   const C=[];const base=l.s?['l','r']:['r','l'];
-  for(const k of (cr0.width<360?[0,1,-1,2,-2]:[0,1,-1,2,-2,3,-3,4,-4]))for(const sd of base)C.push([sd,k*h*.95]);
+  for(const k of (cr0.width<520?[0]:[0,1,-1,2,-2,3,-3,4,-4]))for(const sd of base)C.push([sd,k*h*.95]);
   C.push(['t',0],['b',0]);
   let best=null,bs=1e9;
   for(const [sd,dy] of C){const t=l.t;
@@ -215,8 +220,8 @@ function rotulos(u){
    else if(sd=='t'){t.setAttribute('text-anchor','middle');t.setAttribute('x',x);t.setAttribute('y',y-o)}
    else{t.setAttribute('text-anchor','middle');t.setAttribute('x',x);t.setAttribute('y',y+o+10*u)}
    const b=t.getBBox();const bb={x:b.x-2*u,y:b.y-1*u,w:b.width+4*u,h:b.height+2*u};
-   const vb=VB||[0,0,665,614];const sm=$('mapa'),cr=sm.getBoundingClientRect(),sc0=Math.max(vb[2]/cr.width,vb[3]/cr.height),vw=cr.width*sc0,vx=vb[0]-(vw-vb[2])/2;
-   let sc=placed.filter(q=>hit(bb,q)).length*10+pbox.filter(q=>hit(bb,q)).length*3+Math.abs(dy)/h*.5+(sd==base[0]?0:.2)+((bb.x<vx||bb.x+bb.w>vx+vw)?8:0);
+   const vb=VB||[0,0,665,614];const sm=$('mapa'),cr=sm.getBoundingClientRect(),sc0=Math.max(vb[2]/cr.width,vb[3]/cr.height),vw=cr.width*sc0,vx=vb[0]-(vw-vb[2])/2,vh=cr.height*sc0,vy=vb[1]-(vh-vb[3])/2;
+   let sc=placed.filter(q=>hit(bb,q)).length*10+(cr0.width<520&&!l.s&&pbox.some(q=>hit(bb,q))?8:Math.min(2,pbox.filter(q=>hit(bb,q)).length)*3)+Math.abs(dy)/h*.5+(sd==base[0]?0:.2)+((bb.x<vx||bb.x+bb.w>vx+vw)?8:0)+((bb.y<vy||bb.y+bb.h>vy+vh)?8:0);
    if(sc<bs){bs=sc;best=[sd,dy,bb]} if(sc<.01)break}
   const [sd,dy,bb]=best;const t=l.t;
   if(sd=='r'){t.setAttribute('text-anchor','start');t.setAttribute('x',x+o);t.setAttribute('y',y+4*u+dy)}
@@ -239,7 +244,7 @@ function semanas(){const box=$('c-sem');box.innerHTML='';const W=box.clientWidth
   else{const h=Math.max(2,ah*d.p/100);s.appendChild(el('rect',{x,y:H-bot-h,width:bw,height:h,rx:5,fill:d.atual?'#0F967D':'#8244EB'}));
    s.appendChild(el('text',{...TX,x:x+bw/2,y:H-bot-h-4,'text-anchor':'middle','font-size':bw<40?10:12,'font-weight':700},d.p+'%'))}
   s.appendChild(el('text',{...TX,x:x+bw/2,y:H-14,'text-anchor':'middle','font-size':11,'font-weight':600},d.n));
-  s.appendChild(el('text',{...TX,x:x+bw/2,y:H-2,'text-anchor':'middle','font-size':9,fill:'#cfe0de'},d.d))});
+  s.appendChild(el('text',{...TX,x:x+bw/2,y:H-2,'text-anchor':'middle','font-size':Math.min(9,bw/3.4),fill:'#cfe0de'},d.d))});
  box.appendChild(s)}
 function ano(){const box=$('c-ano');box.innerHTML='';const W=box.clientWidth,H=box.clientHeight;if(W<20||H<30)return;
  const A=D.meses.filter(m=>m[1]!=null);if(!A.length)return;
@@ -251,7 +256,7 @@ function ano(){const box=$('c-ano');box.innerHTML='';const W=box.clientWidth,H=b
  s.appendChild(el('path',{d:line,fill:'none',stroke:'#0F967D','stroke-width':3,'stroke-linejoin':'round'}));
  const showAll=W>360;
  A.forEach((a,i)=>{const last=i==A.length-1;s.appendChild(el('circle',{cx:pts[i][0],cy:pts[i][1],r:last?5:3.5,fill:last?'#F6B00E':'#FCF9F2',stroke:'#005461','stroke-width':1.5}));
-  if(showAll||last||i==0||i%3==0)s.appendChild(el('text',{...TX,x:pts[i][0],y:pts[i][1]-8,'text-anchor':'middle','font-size':10,'font-weight':600},a[1]+'%'));
+  if(showAll||(A.length-1-i)%3==0)s.appendChild(el('text',{...TX,x:pts[i][0],y:pts[i][1]-8,'text-anchor':!showAll&&last?'end':'middle','font-size':10,'font-weight':600},a[1]+'%'));
   s.appendChild(el('text',{...TX,x:pts[i][0],y:H-3,'text-anchor':'middle','font-size':9,fill:'#cfe0de'},showAll?a[0]:a[0][0]))});
  box.appendChild(s)}
 function draw(){ajustaLista();semanas();ano();escala()}
