@@ -74,6 +74,7 @@ h2{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 .grupo li.sep{background:none;padding:.5em .2em .2em;margin:.2em 0 .3em;border-top:1px solid var(--line);border-radius:0;font-size:.82em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--lima);justify-content:space-between;align-items:center}
 .grupo li.sep .pf{background:var(--lima);color:#2a3300;font-size:1em;letter-spacing:0;padding:0 .7em}
 .grupo li.fin .dias{display:block;color:var(--lima);font-weight:600}
+.grupo ul.duas li .dias,.grupo ul.duas li.fin .dias{display:none}
 .grupo li.nada{background:none;padding:.1em .2em;color:var(--ink-2);font-size:.9em}
 .grupo li .dias{margin-left:auto;padding-left:.4em;font-size:.78em;color:var(--ink-2);flex:none}
 .evol{grid-area:evol;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px;min-height:0}
@@ -174,10 +175,10 @@ if(nf){const ul=$('l-atend');if(!D.lista.some(r=>r.st=='atend')){const v=documen
  D.finalizados.forEach(r=>{const li=document.createElement('li');li.className='fin';li.innerHTML='<b></b><span class="seta">→</span><span class="cid"></span><span class="dias"></span>';
   li.children[0].textContent=r.tec;li.children[2].textContent=r.para;li.children[3].textContent=r.dia;ul.appendChild(li)})}
 function ajustaLista(){['l-desl','l-atend'].forEach(id=>{const ul=$(id);if(!ul.children.length)return;
- ul.style.columnCount=1;let f=13;ul.style.fontSize=f+'px';
- const cabe=()=>ul.scrollHeight<=ul.clientHeight+1;
- while(!cabe()&&f>8.5){f-=.5;ul.style.fontSize=f+'px'}
- if(!cabe()){ul.style.columnCount=2;f=12;ul.style.fontSize=f+'px';while(!cabe()&&f>6.5){f-=.5;ul.style.fontSize=f+'px'}}
+ ul.style.columnCount=1;ul.classList.remove('duas');let f=13;ul.style.fontSize=f+'px';
+ const cabe=()=>{if(ul.scrollHeight>ul.clientHeight+1||ul.scrollWidth>ul.clientWidth+1)return false;const l=ul.lastElementChild.getBoundingClientRect(),b=ul.getBoundingClientRect();if(ul.classList.contains('duas')&&[...ul.querySelectorAll('li b,li .cid')].some(e=>e.scrollWidth>e.clientWidth+1))return false;return l.bottom<=b.bottom+1&&l.right<=b.right+1};
+ while(!cabe()&&f>11){f-=.5;ul.style.fontSize=f+'px'}
+ if(!cabe()){ul.style.columnCount=2;ul.classList.add('duas');f=13;ul.style.fontSize=f+'px';while(!cabe()&&f>6.5){f-=.5;ul.style.fontSize=f+'px'}}
 })}
 $('n-desl').textContent=nd;$('n-atend').textContent=na;
 const vz=D.fim_de_semana?'Fim de semana, sem visitas em andamento':'Nenhuma visita nesta etapa hoje';
