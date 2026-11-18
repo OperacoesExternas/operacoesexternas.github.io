@@ -73,9 +73,7 @@ h2{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 .grupo li .seta{color:var(--ink-2)}
 .grupo li.sep{background:none;padding:.5em .2em .2em;margin:.2em 0 .3em;border-top:1px solid var(--line);border-radius:0;font-size:.82em;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--lima);justify-content:space-between;align-items:center}
 .grupo li.sep .pf{background:var(--lima);color:#2a3300;font-size:1em;letter-spacing:0;padding:0 .7em}
-.grupo li.fin{background:rgba(0,0,0,.09);color:var(--ink-2)}
-.grupo li.fin b{color:var(--ink);font-weight:500}
-.grupo li .ok{color:var(--lima);font-weight:700;flex:none}
+.grupo li.fin .dias{display:block;color:var(--lima);font-weight:600}
 .grupo li.nada{background:none;padding:.1em .2em;color:var(--ink-2);font-size:.9em}
 .grupo li .dias{margin-left:auto;padding-left:.4em;font-size:.78em;color:var(--ink-2);flex:none}
 .evol{grid-area:evol;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px;min-height:0}
@@ -133,7 +131,7 @@ h2{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     <section class="evol">
       <div class="card"><h2 id="h-sem">Sucesso por semana</h2><div class="chart" id="c-sem"></div></div>
-      <div class="card"><h2 id="h-ano">Evolução no ano</h2><div class="chart" id="c-ano"></div><div class="rodape">Sem Ausente e Férias · só visitas terminadas · seg a sex</div></div>
+      <div class="card"><h2 id="h-ano">Evolução no ano</h2><div class="chart" id="c-ano"></div></div>
     </section>
   </div>
 </div>
@@ -173,8 +171,8 @@ const nd=D.lista.filter(r=>r.st=='desl').length,na=D.lista.filter(r=>r.st=='aten
 const nf=(D.finalizados||[]).length;
 if(nf){const ul=$('l-atend');if(!D.lista.some(r=>r.st=='atend')){const v=document.createElement('li');v.className='nada';v.textContent='Nenhuma visita em atendimento agora';ul.appendChild(v)}
  const h=document.createElement('li');h.className='sep';h.innerHTML='<span>Finalizados na semana</span><span class="pill pf"></span>';h.children[1].textContent=nf;ul.appendChild(h);
- D.finalizados.forEach(r=>{const li=document.createElement('li');li.className='fin';li.innerHTML='<span class="ok">✓</span><b></b><span class="seta">→</span><span class="cid"></span><span class="dias"></span>';
-  li.children[1].textContent=r.tec;li.children[3].textContent=r.para;li.children[4].textContent=r.dia;ul.appendChild(li)})}
+ D.finalizados.forEach(r=>{const li=document.createElement('li');li.className='fin';li.innerHTML='<b></b><span class="seta">→</span><span class="cid"></span><span class="dias"></span>';
+  li.children[0].textContent=r.tec;li.children[2].textContent=r.para;li.children[3].textContent=r.dia;ul.appendChild(li)})}
 function ajustaLista(){['l-desl','l-atend'].forEach(id=>{const ul=$(id);if(!ul.children.length)return;
  ul.style.columnCount=1;let f=13;ul.style.fontSize=f+'px';
  const cabe=()=>ul.scrollHeight<=ul.clientHeight+1;
